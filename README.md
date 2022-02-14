@@ -2,7 +2,7 @@
 
 ## Proje Hakkında
 
-Proje hakkında detaylı bilgi için şu dokümanı inceleyiniz. -> [Payten Java Spring Bootcamp Bitirme Projesi Dosyası]()
+Proje hakkında detaylı bilgi için şu dokümanı inceleyiniz. -> [Payten Java Spring Bootcamp Bitirme Projesi Dosyası](https://github.com/Payten-Java-Spring-Bootcamp/final-project-halilerkandursunoglu/blob/main/Payten%20Java%20Spring%20Bootcamp%20Bitirme%20Projesi.pdf)
 
 ## Projede Kullanılanlar Teknolojiler
 
