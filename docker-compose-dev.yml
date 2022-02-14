@@ -1,0 +1,107 @@
+version: "3"
+
+services:
+  finalproject-backend-db:
+    image: postgres
+    container_name: finalproject-backend-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    networks:
+      - finalproject
+
+  finalproject-creditscore-db:
+    image: postgres
+    container_name: finalproject-creditscore-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    networks:
+      - finalproject
+
+  finalproject-adminer:
+    image: adminer
+    container_name: finalproject-adminer
+    restart: always
+    depends_on:
+      - finalproject-backend-db
+      - finalproject-creditscore-db
+    ports:
+      - "8080:8080"
+    networks:
+      - finalproject
+
+  finalproject-backend-cache:
+    image: docker.io/bitnami/redis:6.2
+    container_name: finalproject-backend-cache
+    ports:
+      - "6379:6379"
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    volumes:
+      - "redis_data:/bitnami/redis/data"
+
+  finalproject-backend-api:
+    image: finalproject-backend-api
+    build: ./backend
+    container_name: finalproject-backend-api
+    depends_on:
+      - finalproject-backend-db
+      - finalproject-backend-cache
+    ports:
+      - "8082:8082"
+    environment:
+      - SERVER_PORT=8082
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://finalproject-backend-db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - REDIS_HOST=finalproject-cache
+      - REDIS_PORT=6379
+    networks:
+      - finalproject
+
+  finalproject-creditscore-api:
+    image: finalproject-creditscore-api
+    build: ./creditscore
+    container_name: finalproject-creditscore-api
+    depends_on:
+      - finalproject-creditscore-db
+    ports:
+      - "8083:8083"
+    environment:
+      - SERVER_PORT=8083
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://finalproject-creditscore-db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+    networks:
+      - finalproject
+
+  finalproject-sms-api:
+    image: finalproject-sms-api
+    build: ./sms
+    container_name: finalproject-sms-api
+    ports:
+      - "8084:8084"
+    environment:
+      - SERVER_PORT=8084
+      - TWILIO_ACCOUNT_SID=AC748*****
+      - TWILIO_AUTH_TOKEN=d6592*****
+      - TWILIO_TRIAL_NUMBER=+18455*****
+    networks:
+      - finalproject
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  finalproject:
+    driver: "bridge"
